@@ -3,10 +3,53 @@ import java.util.Random;
 
 
 class guess_game {
-    //private int difficult;
-
+    private int[] high_score = new int[3];
+ 
     public guess_game() {
-        
+        this.high_score[0] = -1;
+        this.high_score[1] = -1;
+        this.high_score[2] = -1;
+    }
+
+    public int get_high_score(int difficult) {
+        if (difficult >= 0 && difficult <= 2) {
+            return this.high_score[difficult];
+        } 
+        return -1;
+    }
+
+    public void set_high_score(int difficult, int new_possible_high_score) {
+        if (difficult >= 0 && difficult <= 2) {
+            if (this.high_score[difficult] == -1) {
+                this.high_score[difficult] = new_possible_high_score;
+            } else if (this.high_score[difficult] > new_possible_high_score) {
+                this.high_score[difficult] = new_possible_high_score;
+            }
+            
+        } 
+    }
+
+    private boolean some_has_high_score() {
+        boolean res = false;
+        for(int i = 0; i < 3; i++) {
+            if (this.high_score[i] != -1) {
+                res = true;
+            }
+        }
+        return res;
+    }
+
+    public void show_high_score() {
+        if (some_has_high_score()) {
+            System.out.println("The high_scores are: ");
+            for(int i = 0; i < 3; i++) {
+                if (this.high_score[i] != -1) {
+                    System.out.println(i + ". " + this.high_score[i]);
+                }
+                
+            }
+            System.out.println();
+        }
     }
 
     public void welcome_player() {
@@ -15,7 +58,6 @@ class guess_game {
 
     public void give_menu() {
         System.out.println("I'm thinking of a number between 1 and 100.");
-        System.out.println("You have 5 chances to guess the correct number.");
         System.out.println();
         System.out.println("Please select the difficulty level:");
         System.out.println("1. Easy (10 chances)");
@@ -30,9 +72,14 @@ class guess_game {
         guess_game.welcome_player();
         int keep_playing = 1;
         do {
+            guess_game.show_high_score();
             guess_game.give_menu();
-            Guess guess = new Guess(scanner.map_difficult_number_of_tries(scanner.select_difficult()));
-            guess.guessing_number();
+            int difficult = scanner.select_difficult();
+            Guess guess = new Guess(scanner.map_difficult_number_of_tries(difficult));
+            int number_of_guess = guess.guessing_number();
+            if (number_of_guess != -1) {
+                guess_game.set_high_score(difficult, number_of_guess);
+            }
             keep_playing = scanner.keep_playing();
         } while(keep_playing == 1);
         
@@ -47,6 +94,7 @@ class Scan {
         System.out.println("If you want to keep playing:");
         System.out.println("1. Yes");
         System.out.println("Otherwise. No");
+        System.out.print("Enter your choice: ");
         return myObj.nextInt();
     }
 
@@ -108,15 +156,14 @@ class Guess {
         this.number_to_guess = rand.nextInt(99) + 1;
     }
 
-    public boolean guessing_number() {
+    public int guessing_number() {
         int user_input;
         Scan scanner = new Scan();
-        System.out.println("The number of tries" + this.tries);
         while (tries > 0) {
             user_input = scanner.ask_number();
             if (user_input == this.number_to_guess) {
                 System.out.println("Congratulations! You guessed the correct number in " + this.guessings + " attempts.");
-                return true;
+                return this.guessings;
             } else if (user_input > this.number_to_guess) {
                 System.out.println("Incorrect! The number is less than " + user_input);
             } else {
@@ -126,8 +173,8 @@ class Guess {
             guessings++;
             System.out.println();
         }
-        System.out.println("The number was");
-        System.out.println(this.number_to_guess);
-        return false;
+        System.out.println("The number was" + this.number_to_guess);
+        System.out.println();
+        return -1;
     }
 }
