@@ -1,6 +1,8 @@
 import java.util.Scanner;
+import java.time.Instant;
 import java.util.Random;
-
+import java.time.Duration;
+import java.time.LocalTime;
 
 class guess_game {
     private int[] high_score = new int[3];
@@ -147,6 +149,7 @@ class Guess {
     private int tries;
     private int number_to_guess;
     private int guessings;
+    private LocalTime time = null;
 
     public Guess(int tries) {
         Random rand = new Random();
@@ -156,13 +159,30 @@ class Guess {
         this.number_to_guess = rand.nextInt(99) + 1;
     }
 
+    public void setActualTime() {
+        this.time = LocalTime.now();
+    }
+
+    public void timePassed() {
+        if (this.time != null) {
+            System.out.print("The time that took to find the number was ");
+            Duration duration = Duration.between(this.time, LocalTime.now());
+            long seconds = duration.getSeconds(); 
+            System.out.println(seconds + " seconds.");
+
+            this.time = null;
+        }
+    }
+
     public int guessing_number() {
         int user_input;
         Scan scanner = new Scan();
+        this.setActualTime();
         while (tries > 0) {
             user_input = scanner.ask_number();
             if (user_input == this.number_to_guess) {
                 System.out.println("Congratulations! You guessed the correct number in " + this.guessings + " attempts.");
+                this.timePassed();
                 return this.guessings;
             } else if (user_input > this.number_to_guess) {
                 System.out.println("Incorrect! The number is less than " + user_input);
